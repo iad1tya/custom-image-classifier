@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Prediction - Custom Image Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .back-link {
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .predict-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .upload-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .upload-box {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 400px;
+            margin: 20px auto;
+            display: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        #video {
+            width: 100%;
+            max-width: 640px;
+            display: none;
+            margin: 20px auto;
+            border-radius: 8px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .prediction {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .confidence {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .all-predictions {
+            margin-top: 20px;
+        }
+        
+        .prediction-bar {
+            margin: 10px 0;
+        }
+        
+        .prediction-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .bar-container {
+            width: 100%;
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <header>
+            <h1>🔮 Make Prediction</h1>
+            <p>Use your trained model to classify images</p>
+        </header>
+        
+        <div class="predict-section">
+            <div class="form-group">
+                <label for="projectSelect">Select Trained Model:</label>
+                <select id="projectSelect" required>
+                    <option value="">-- Select a project --</option>
+                </select>
+            </div>
+            
+            <div class="upload-options">
+                <div class="upload-box" id="uploadBox">
+                    <div class="upload-icon">🖼️</div>
+                    <p><strong>Upload Image</strong></p>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Click to select</p>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="upload-box" id="webcamBox">
+                    <div class="upload-icon">📷</div>
+                    <p><strong>Use Webcam</strong></p>
+                    <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Click to activate</p>
+                </div>
+            </div>
+            
+            <img id="imagePreview" />
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            
+            <button class="btn btn-primary" id="predictBtn" style="display: none;">Predict</button>
+            <button class="btn btn-secondary" id="captureBtn" style="display: none;">Capture from Webcam</button>
+            
+            <div class="result-section" id="resultSection">
+                <div class="result-title">🎯 Prediction Result</div>
+                <div class="prediction" id="predictionText"></div>
+                <div class="confidence" id="confidenceText"></div>
+                
+                <div class="all-predictions" id="allPredictions">
+                    <h4 style="margin-bottom: 10px;">All Class Probabilities:</h4>
+                    <div id="predictionBars"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentImage = null;
+        let videoStream = null;
+        
+        // Load projects
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/projects');
+                const projects = await response.json();
+                
+                const select = document.getElementById('projectSelect');
+                select.innerHTML = '<option value="">-- Select a project --</option>';
+                
+                projects.filter(p => p.trained).forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.name;
+                    option.textContent = `${project.name} (${project.num_classes} classes)`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+        
+        window.onload = loadProjects;
+        
+        // Upload image
+        document.getElementById('uploadBox').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = document.getElementById('imagePreview');
+                    img.src = event.target.result;
+                    img.style.display = 'block';
+                    currentImage = event.target.result;
+                    
+                    document.getElementById('video').style.display = 'none';
+                    document.getElementById('captureBtn').style.display = 'none';
+                    document.getElementById('predictBtn').style.display = 'block';
+                    
+                    if (videoStream) {
+                        videoStream.getTracks().forEach(track => track.stop());
+                        videoStream = null;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Webcam
+        document.getElementById('webcamBox').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoStream = stream;
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('captureBtn').style.display = 'block';
+                document.getElementById('predictBtn').style.display = 'none';
+            } catch (err) {
+                alert('Error accessing webcam: ' + err.message);
+            }
+        });
+        
+        // Capture from webcam
+        document.getElementById('captureBtn').addEventListener('click', () => {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            
+            currentImage = canvas.toDataURL('image/jpeg');
+            
+            const img = document.getElementById('imagePreview');
+            img.src = currentImage;
+            img.style.display = 'block';
+            
+            video.style.display = 'none';
+            document.getElementById('captureBtn').style.display = 'none';
+            document.getElementById('predictBtn').style.display = 'block';
+            
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        });
+        
+        // Make prediction
+        document.getElementById('predictBtn').addEventListener('click', async () => {
+            const projectName = document.getElementById('projectSelect').value;
+            
+            if (!projectName) {
+                alert('Please select a project');
+                return;
+            }
+            
+            if (!currentImage) {
+                alert('Please upload or capture an image');
+                return;
+            }
+            
+            const predictBtn = document.getElementById('predictBtn');
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Predicting...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('project_name', projectName);
+                formData.append('image_data', currentImage);
+                
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    displayPrediction(data);
+                }
+            } catch (error) {
+                alert('Prediction failed: ' + error.message);
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Predict';
+            }
+        });
+        
+        function displayPrediction(data) {
+            document.getElementById('predictionText').textContent = data.prediction;
+            document.getElementById('confidenceText').textContent = 
+                `Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+            
+            const barsContainer = document.getElementById('predictionBars');
+            barsContainer.innerHTML = '';
+            
+            const probabilities = data.all_probabilities;
+            const sortedClasses = Object.entries(probabilities)
+                .sort((a, b) => b[1] - a[1]);
+            
+            sortedClasses.forEach(([className, prob]) => {
+                const barDiv = document.createElement('div');
+                barDiv.className = 'prediction-bar';
+                barDiv.innerHTML = `
+                    <div class="prediction-label">
+                        <span>${className}</span>
+                        <span>${(prob * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${prob * 100}%"></div>
+                    </div>
+                `;
+                barsContainer.appendChild(barDiv);
+            });
+            
+            document.getElementById('resultSection').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dataset - Custom Image Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .back-link {
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #ccc;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .drop-zone-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        
+        .progress {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <header>
+            <h1>📤 Upload Dataset</h1>
+            <p>Upload your custom image dataset for training</p>
+        </header>
+        
+        <div class="upload-section">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="projectSelect">Select Project:</label>
+                    <select id="projectSelect" required>
+                        <option value="">-- Select a project --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="classNameGroup" style="display: none;">
+                    <label for="className">Class Name (for single images):</label>
+                    <input type="text" id="className" placeholder="e.g., dog, cat, car">
+                    <small style="color: #666;">Leave empty if uploading a zip file with folders</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload Files:</label>
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-icon">📁</div>
+                        <p><strong>Click to select files</strong> or drag and drop</p>
+                        <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                            Supported: JPG, PNG, GIF, BMP or ZIP file
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.gif,.bmp,.zip" style="display: none;">
+                </div>
+                
+                <div class="progress" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <div class="status-message" id="statusMessage"></div>
+                
+                <button type="submit" class="btn btn-primary" id="uploadBtn">Upload Dataset</button>
+            </form>
+            
+            <div class="instructions">
+                <h3>📋 Instructions</h3>
+                <ol>
+                    <li><strong>Create a project</strong> first from the home page</li>
+                    <li><strong>Organize your images</strong> into folders by class name:
+                        <pre style="background: white; padding: 10px; margin: 10px 0; border-radius: 4px;">
+my_dataset/
+├── class1/
+│   ├── image1.jpg
+│   └── image2.jpg
+├── class2/
+│   └── image1.jpg
+└── class3/
+    └── image1.jpg</pre>
+                    </li>
+                    <li><strong>Zip the folder</strong> and upload, OR</li>
+                    <li><strong>Upload individual images</strong> and specify the class name</li>
+                    <li>Recommended: <strong>At least 50-100 images per class</strong> for best results</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load projects
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/projects');
+                const projects = await response.json();
+                
+                const select = document.getElementById('projectSelect');
+                select.innerHTML = '<option value="">-- Select a project --</option>';
+                
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.name;
+                    option.textContent = project.name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+        
+        // Initialize
+        window.onload = loadProjects;
+        
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            fileInput.files = e.dataTransfer.files;
+            updateDropZone();
+        });
+        
+        fileInput.addEventListener('change', updateDropZone);
+        
+        function updateDropZone() {
+            const files = fileInput.files;
+            if (files.length > 0) {
+                const file = files[0];
+                dropZone.innerHTML = `
+                    <div class="drop-zone-icon">✓</div>
+                    <p><strong>${file.name}</strong></p>
+                    <p style="color: #666; font-size: 0.9rem;">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                `;
+                
+                // Show class name input for non-zip files
+                if (!file.name.endsWith('.zip')) {
+                    document.getElementById('classNameGroup').style.display = 'block';
+                } else {
+                    document.getElementById('classNameGroup').style.display = 'none';
+                }
+            }
+        }
+        
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const projectName = document.getElementById('projectSelect').value;
+            const className = document.getElementById('className').value;
+            const files = fileInput.files;
+            
+            if (!projectName) {
+                alert('Please select a project');
+                return;
+            }
+            
+            if (files.length === 0) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            const file = files[0];
+            if (!file.name.endsWith('.zip') && !className) {
+                alert('Please enter a class name for individual images');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('project_name', projectName);
+            formData.append('file', file);
+            if (className) {
+                formData.append('class_name', className);
+            }
+            
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            statusMessage.style.display = 'none';
+            
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        progressFill.style.width = percent + '%';
+                    }
+                });
+                
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        statusMessage.className = 'status-message status-success';
+                        statusMessage.textContent = 'Upload successful! Classes: ' + response.classes.join(', ');
+                        statusMessage.style.display = 'block';
+                        
+                        // Reset form
+                        fileInput.value = '';
+                        document.getElementById('className').value = '';
+                        dropZone.innerHTML = `
+                            <div class="drop-zone-icon">📁</div>
+                            <p><strong>Click to select files</strong> or drag and drop</p>
+                            <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">
+                                Supported: JPG, PNG, GIF, BMP or ZIP file
+                            </p>
+                        `;
+                    } else {
+                        const error = JSON.parse(xhr.responseText);
+                        throw new Error(error.error || 'Upload failed');
+                    }
+                    uploadBtn.disabled = false;
+                });
+                
+                xhr.addEventListener('error', () => {
+                    statusMessage.className = 'status-message status-error';
+                    statusMessage.textContent = 'Upload failed. Please try again.';
+                    statusMessage.style.display = 'block';
+                    uploadBtn.disabled = false;
+                });
+                
+                xhr.open('POST', '/api/upload_dataset');
+                xhr.send(formData);
+            } catch (error) {
+                statusMessage.className = 'status-message status-error';
+                statusMessage.textContent = 'Error: ' + error.message;
+                statusMessage.style.display = 'block';
+                uploadBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

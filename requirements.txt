@@ -1,1 +1,18 @@
-flask opencv-python torch torchvision pymongo
+# Web Framework
+flask==3.0.0
+werkzeug==3.0.1
+
+# Deep Learning
+torch==2.1.0
+torchvision==0.16.0
+
+# Image Processing
+opencv-python==4.8.1.78
+Pillow==10.1.0
+
+# Data & Utils
+numpy==1.26.2
+requests==2.31.0
+
+# Optional: Database for tracking (can be removed if not needed)
+pymongo==4.6.0

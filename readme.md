@@ -1,200 +1,183 @@
-# DermaVision
+<div align="center">
 
-**DermaVision** is an advanced AI-powered web application for intelligent skin condition analysis and facial recognition. It integrates deep learning and computer vision to deliver comprehensive skin health assessments while maintaining secure, personalized user profiles through facial recognition technology.
+# Custom Image Classifier
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.1.0-red.svg)](https://pytorch.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**Train custom image classification models without writing code**
+
+[Quick Start](#quick-start) •
+[Features](#features) •
+[Documentation](#documentation) •
+[Contributing](#contributing)
+
+</div>
 
 ---
 
 ## Overview
 
-DermaVision enables users to perform automated skin assessments and track progress over time. It leverages convolutional neural networks (CNNs), transfer learning, and real-time computer vision to ensure high accuracy and efficient processing.
+A complete framework for building custom image classification models through an intuitive web interface. Perfect for students, researchers, and developers who need fast ML prototyping.
+
+**Key Capabilities:**
+- Upload datasets and train models via web UI or CLI
+- Support for any number of classes
+- Automatic data augmentation and validation
+- REST API for integration
+- Real-time training monitoring
 
 ---
 
-## Core Features
-
-### Skin Analysis
-
-* **Multi-Condition Detection**
-
-  * Acne detection with severity classification
-  * Pigmentation pattern recognition
-  * Dark circle identification
-  * Healthy skin verification
-  * Real-time visual feedback
-
-### Intelligent User System
-
-* **Facial Recognition**
-
-  * Biometric user authentication
-  * Secure profile management
-  * Multi-angle facial detection
-
-### Data Analytics
-
-* **Comprehensive Tracking**
-
-  * Historical data storage
-  * Progress and trend monitoring
-  * Encrypted data handling
-
----
-
-## Technical Architecture
-
-### AI/ML Components
-
-* **Deep Learning Models**
-
-  * Custom CNN architecture for skin condition classification
-  * Transfer learning for enhanced model accuracy
-  * Real-time inference and result generation
-
-### Backend Infrastructure
-
-* **Framework:** Flask (Python)
-* **Computer Vision:** OpenCV, Dlib
-* **Deep Learning Framework:** PyTorch
-* **Database:** MongoDB (NoSQL)
-
-### Security
-
-* Encrypted data storage and transfer
-* Secure user authentication mechanisms
-* Privacy-by-design implementation
-
----
-
-## Project Structure
-
-```
-├── app.py              # Main application and routing
-├── face_detection.py   # Facial recognition logic
-├── face_utils.py       # Face processing utilities
-├── skin_analysis.py    # Skin condition analysis engine
-├── config.py           # Configuration settings
-├── models/             # Model architectures and weights
-├── database/           # Database schemas and operations
-├── dataset/            # Training and validation data
-│   ├── Acne/
-│   ├── DarkCircles/
-│   ├── HealthySkin/
-│   └── Pigmentation/
-├── scripts/            # Utility scripts
-├── static/             # Frontend assets (CSS, JS, images)
-├── templates/          # HTML templates
-└── requirements.txt    # Project dependencies
-```
-
----
-
-## Setup Guide
-
-### System Requirements
-
-* Python 3.7 or higher
-* MongoDB 4.0 or higher
-* CUDA-compatible GPU (recommended)
-* Webcam (for face recognition features)
-
-### Installation
-
-#### 1. Clone the Repository
+## Quick Start
 
 ```bash
-git clone https://github.com/iad1tya/Dermavision.git
-cd Dermavision
-```
-
-#### 2. Create a Virtual Environment
-
-```bash
+# Clone and install
+git clone https://github.com/iad1tya/custom-image-classifier.git
+cd custom-image-classifier
 python -m venv venv
-source venv/bin/activate  # Unix/macOS
-.\venv\Scripts\activate   # Windows
-```
-
-#### 3. Install Dependencies
-
-```bash
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
 
-#### 4. Configure the Database
-
-* Install and start MongoDB
-* Update connection details in `config.py`
-
-#### 5. Launch the Application
-
-```bash
+# Run
 python app.py
 ```
 
-Access the web interface at: [http://localhost:5000](http://localhost:5000)
+Open `http://localhost:5000` in your browser.
 
 ---
 
-## Testing
+## Features
+
+### Core Features
+- **Web Interface** - Upload datasets, train models, make predictions
+- **CLI Tool** - Command-line interface for automation (\`cli.py\`)
+- **REST API** - Integration endpoints for training and prediction
+- **GPU Support** - CUDA acceleration for faster training
+- **Multiple Projects** - Manage multiple models simultaneously
+
+### Technical Features
+- Custom CNN architecture optimized for image classification
+- Automatic data preprocessing and augmentation
+- Real-time training progress monitoring
+- Model checkpointing and versioning
+- Confidence score visualization
+
+---
+
+## Usage
+
+### Web Interface
+
+1. **Create Project** - Click "New Project" and enter a name
+2. **Upload Dataset** - Organize images by class folders, upload as ZIP
+   \`\`\`
+   my_dataset/
+   ├── class1/
+   │   ├── image1.jpg
+   │   └── image2.jpg
+   └── class2/
+       └── image1.jpg
+   \`\`\`
+3. **Train** - Click "Train", configure parameters (epochs, batch size)
+4. **Predict** - Upload test images or use webcam
+
+### CLI
 
 ```bash
-# Run all unit tests
-python -m pytest tests/
+# List projects
+python cli.py list
 
-# Run a specific test suite
-python -m pytest tests/test_skin_analysis.py
+# Create project
+python cli.py create my_project
+
+# Train model
+python cli.py train my_project --epochs 20
+```
+
+### API
+
+```bash
+# Train model
+curl -X POST http://localhost:5000/api/train \
+  -H "Content-Type: application/json" \
+  -d '{"project_name": "my_project", "epochs": 10}'
+
+# Make prediction
+curl -X POST http://localhost:5000/api/predict \
+  -F "project_name=my_project" \
+  -F "image=@test.jpg"
 ```
 
 ---
 
-## Performance Metrics
+## Architecture
 
-| Feature                     | Accuracy |
-| --------------------------- | -------- |
-| Face Detection              | ~98%     |
-| Acne Detection              | ~95%     |
-| Pigmentation Classification | ~93%     |
-| Dark Circles Identification | ~91%     |
+**Stack:** Flask (backend) + PyTorch (ML) + OpenCV (vision)
+
+**Model:** Custom CNN with 3 conv layers, max pooling, batch normalization, dropout (50%)
+
+**Project Structure:**
+```
+├── app.py              # Flask application
+├── cli.py              # Command-line interface
+├── config.py           # Configuration
+├── models/model.py     # CNN architecture
+├── scripts/train_model.py
+├── templates/          # Web UI
+└── utils/predictor.py
+```
+
+---
+
+## Configuration
+
+Edit \`config.py\`:
+
+```python
+DEFAULT_EPOCHS = 10
+DEFAULT_BATCH_SIZE = 32
+DEFAULT_LEARNING_RATE = 0.001
+IMAGE_SIZE = (128, 128)
+USE_CUDA = True  # GPU acceleration
+```
+
+---
+
+## Documentation
+
+- **[Getting Started](GETTING_STARTED.md)** - Detailed setup guide
+- **[Dataset Guide](DATASET_GUIDE.md)** - How to prepare datasets
+- **[Installation](INSTALL.md)** - Platform-specific instructions
+- **[Contributing](CONTRIBUTING.md)** - Development guidelines
+- **[Changelog](CHANGELOG.md)** - Version history
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch:
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-   ```bash
-   git checkout -b feature/YourFeatureName
-   ```
-3. Commit your changes:
+```bash
+# Setup development environment
+pip install -r requirements-dev.txt
+pre-commit install
 
-   ```bash
-   git commit -m "Add new feature"
-   ```
-4. Push to the branch:
-
-   ```bash
-   git push origin feature/YourFeatureName
-   ```
-5. Open a Pull Request
-
----
-
-## Disclaimer
-
-DermaVision is developed for **research and educational purposes only**.
-It is **not intended for medical diagnosis or treatment**.
-Users should consult qualified healthcare professionals for medical advice.
+# Run tests
+pytest
+```
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**.
-Refer to the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## Team
+## Acknowledgments
 
-**Lead Developer:** Aditya Yadav
+Built with [PyTorch](https://pytorch.org/), [Flask](https://flask.palletsprojects.com/), and [OpenCV](https://opencv.org/).
+
