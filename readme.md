@@ -1,6 +1,6 @@
 <div align="center">
 
-![Custom Image Classifier](custom_image_classifier.png)
+<img src="custom_image_classifier.png" width="150" alt="Custom Image Classifier">
 
 # Custom Image Classifier
 
