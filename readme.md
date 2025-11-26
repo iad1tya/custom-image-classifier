@@ -1,5 +1,7 @@
 <div align="center">
 
+![Custom Image Classifier](custom_image_classifier.png)
+
 # Custom Image Classifier
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
